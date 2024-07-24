@@ -54,6 +54,9 @@ select count(distinct customers.acctnum),  avg(quantity*price)
 from FebSales
 left join customers
 on customers.order_id = FebSales.orderID
+where FebSales.Quantity > 2
+and length(orderID) = 6
+and orderID <> 'Order ID';
 
 --List all the products sold in Los Angeles in February, and include how many of each were sold.
 
@@ -61,7 +64,3 @@ select Product, sum(Quantity)
 from FebSales
 where location like '%Los Angeles%'
 group by Product;
-
-where FebSales.Quantity > 2
-and length(orderID) = 6
-and orderID <> 'Order ID';
