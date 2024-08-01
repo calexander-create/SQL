@@ -1,0 +1,129 @@
+--Table = Chinook - a database with data on a digital media store and includes tables for artists, albums, media tracks, invoices, and customers.
+
+--Show Customers (their full names, customer ID, and country) who are not in the US. 
+
+select firstname, lastname, customerid, country from customers
+where country <> 'US';
+
+--Show only the Customers from Brazil.
+
+select firstname, lastname, customerid from customers
+where country = 'Brazil';
+
+--Find the Invoices of customers who are from Brazil. The resulting table should show the customer's full name, Invoice ID, Date of the invoice, and billing country.
+
+select customers.FirstName, customers.LastName, invoices.InvoiceId, invoices.InvoiceDate, invoices.BillingCountry
+from invoices
+join customers on customers.CustomerId = invoices.CustomerId
+where invoices.billingcountry = 'Brazil'
+order by invoices.invoicedate;
+
+-- the Employees who are Sales Agents.
+
+select lastname, firstname, title from employees
+where title like '%Agent%';
+
+--Find a unique/distinct list of billing countries from the Invoice table.
+
+select distinct(billingcity), billingcountry from invoices
+where billingcountry = 'USA';
+
+select distinct(invoicedate), billingcountry from invoices
+where billingcountry <> 'USA'
+and invoicedate like '2009%';
+
+--Provide a query that shows the invoices associated with each sales agent. The resulting table should include the Sales Agent's full name.
+
+select employees.FirstName, employees.LastName, invoices.InvoiceId
+from employees
+join customers on employees.EmployeeId = customers.SupportRepId
+join invoices on invoices.customerid = customers.CustomerId
+order by invoiceid;
+
+--Show the Invoice Total, Customer name, Country, and Sales Agent name for all invoices and customers.
+
+select sum(invoices.total), customers.FirstName, customers.LastName, invoices.billingcountry, employees.FirstName, employees.LastName
+from invoices
+join customers on invoices.CustomerId = customers.CustomerId
+join employees on customers.SupportRepId = employees.EmployeeId
+group by customers.CustomerId;
+
+--How many Invoices were there in 2009?
+
+select count(invoices.InvoiceId)
+from invoices
+where invoices.InvoiceDate like '2009%';
+
+--What are the total sales for 2009?
+
+select sum(total) from invoices
+where invoicedate like '2009%';
+
+--Write a query that includes the purchased track name with each invoice line ID.
+
+select tracks.Name, invoice_items.invoicelineid
+from tracks
+join invoice_items on invoice_items.TrackId = tracks.TrackId;
+
+--Write a query that includes the purchased track name AND artist name with each invoice line ID.
+
+select tracks.Name, artists.name, invoice_items.InvoiceLineId
+from invoice_items
+join tracks on invoice_items.TrackId = tracks.TrackId
+join albums on tracks.AlbumId = albums.albumid
+join artists on albums.ArtistId = artists.ArtistId;
+
+--Provide a query that shows all the Tracks, and include the Album name, Media type, and Genre.
+
+select tracks.name, albums.Title, media_types.Name, genres.Name
+from albums
+join tracks on tracks.AlbumId = albums.AlbumId
+join media_types on media_types.MediaTypeId = tracks.MediaTypeId
+join genres on genres.GenreId = tracks.GenreId;
+
+--Show the total sales made by each sales agent.
+
+select sum(invoices.Total), employees.FirstName, employees.LastName
+from invoices
+join customers on invoices.CustomerId = customers.customerid
+join employees on employees.EmployeeId = customers.SupportRepId
+group by customers.SupportRepId;
+
+--Which sales agent made the most dollars in sales in 2009?
+
+select sum(invoices.Total), employees.FirstName, employees.LastName
+from invoices
+join customers on invoices.CustomerId = customers.customerid
+join employees on employees.EmployeeId = customers.SupportRepId
+group by customers.SupportRepId
+order by sum(invoices.Total) desc
+limit 1;
+
+-- What is the sum spent per employee per customer?
+
+select employees.FirstName, customers.FirstName, sum(invoice_items.UnitPrice * invoice_items.Quantity)
+from invoice_items
+join invoices on invoices.InvoiceId = invoice_items.InvoiceId
+join customers on customers.CustomerId = invoices.CustomerId
+join employees on customers.SupportRepId = employees.EmployeeId
+group by customers.CustomerId
+order by employees.EmployeeId;
+
+--What are the different media types on the artists albums?
+
+select albums.title, media_types.Name, artists.Name
+from media_types
+join tracks on tracks.MediaTypeId = media_types.MediaTypeId
+join albums on albums.AlbumId = tracks.AlbumId
+join artists on artists.ArtistId = albums.ArtistId
+where composer <> 'NULL'
+group by title;
+
+--What genre is each artist considered?
+
+select artists.Name, genres.Name
+from artists
+join albums on albums.ArtistId = artists.ArtistId
+join tracks on tracks.AlbumId = albums.AlbumId
+join genres on genres.GenreId = tracks.GenreId
+group by artists.Name;
